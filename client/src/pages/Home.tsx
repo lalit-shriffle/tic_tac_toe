@@ -17,6 +17,7 @@ const initialState = {
 const Home = (props: Props) => {
   const [score, setScore] = useState(initialState);
   const [player, setPlayer] = useState("1");
+  const [winner,setWinner] = useState<string|null>(null)
 
   function handleClick(box: number) {
     console.log(box);
@@ -34,16 +35,15 @@ const Home = (props: Props) => {
 
 useEffect(()=>{
   isPalyerWon();
-
 },[score])
 
   function isPalyerWon() {
-    console.log( score[1].value, score[2].value, score[3].value);
     if ((score[1].value &&score[2].value&& score[3].value)&&
       score[1].value === score[2].value &&
       score[2].value === score[3].value
     ) {
-      console.log("player won");
+      setWinner(score[1].player);
+      console.log("player won",score[1].player);
     }
   }
   return (
