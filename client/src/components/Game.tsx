@@ -116,7 +116,7 @@ const Game = (props: Props) => {
   return (
     <div className="h-screen bg-white flex items-center justify-center">
       {/* wrapper */}
-      <div className="shadow-sm rounded flex flex-col justify-center gap-6 items-center  shadow-black min-h-[40vh]  w-[50vw]">
+      <div className="shadow-sm rounded flex flex-col justify-center gap-6 items-center  shadow-black min-h-[60vh]  w-[50vw]">
         <GameInfo />
 
         <Result winner={winner} opponateWinnerName={opponateWinnerName} />

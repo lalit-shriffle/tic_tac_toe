@@ -20,8 +20,8 @@ const GameInfo = (props: Props) => {
 
 
   return (
-    <div className='flex flex-col  items-center w-full'>
-        <div className='flex gap-2 justify-center items-center w-full'>
+    <div className='flex flex-col gap-2 text-white   items-center w-full'>
+        <div className='flex gap-2 justify-center items-center rounded p-1 w-fit bg-black '>
             <span>
                 gameId :
             </span>
@@ -36,7 +36,7 @@ const GameInfo = (props: Props) => {
             </span>
             </div>
             :<>
-            <span>waiting for joinee</span>
+            <span className='bg-blue-600 p-1 text-white rounded'>waiting for opponent</span>
             </>
             }
         </div>}
