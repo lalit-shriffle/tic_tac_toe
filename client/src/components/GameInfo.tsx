@@ -9,10 +9,12 @@ const GameInfo = (props: Props) => {
     const [joinee, setJoinee] = useState(null);
     const {User, setUser} = useContext(userContext);
     const {gameId} = useContext(gameContext);
+    console.log("User",User);
 
     useEffect(()=>{
        if(socket){
         socket.on("user-joined",(data)=>{
+            console.log("dataaa",data);
             setJoinee(data)
         })
        }
@@ -27,10 +29,10 @@ const GameInfo = (props: Props) => {
             </span>
             <span>{gameId}</span>
         </div>
-        {User?.isHost && <div className='flex gap-2 justify-center items-center w-full'>
+        {User?.isHost && <div className='flex gap-2 justify-center  text-black  items-center w-full'>
             {joinee?
             <div className=''>
-            <span>{joinee}</span>
+            <span>{joinee}{" "}</span>
             <span>
                  Joined the game
             </span>

@@ -7,31 +7,34 @@ const app = express();
 
 // middlewares
 app.use(cors({
-    origin:"http://192.168.1.19:3000"
+    origin:process.env.CLIENT_URL
 }))
 
 
 const server  = app.listen(process.env.PORT,()=>{
     console.log("server is running...",process.env.PORT);
-})
+});
+
+
 interface User {
     socketId:string;
     username:string;
 }
+
 interface Game {
     gameId:string;
     hostId:string;
     joineeId:string | null;
 }
+
+// user and game initailization
 const connectedUsers: User[] =[];
 const games:Game[] = [];
 
-
-
-
+// socket server
 const io =  Server(server,{
     cors:{
-        origin:"http://192.168.1.19:3000",
+        origin:process.env.CLIENT_URL,
         methods:["GET","POST"]
     }
 })
@@ -67,10 +70,10 @@ function getGameById(gameId:string){
 function getUserBySocket(socketId:string){
     return connectedUsers.find((user)=>user.socketId === socketId)
 }
+
+// Event Listeners
 io.on("connection",(socket:any)=>{
     console.log("socket connected",socket.id);
-
-    
 
     socket.on("start-game",(data:{name:string,gameId:string})=>{
         const {name, gameId} = data;
@@ -101,8 +104,36 @@ io.on("connection",(socket:any)=>{
         const user = getUserBySocket(socket.id);
         const opponetId = game?.hostId===socket.id ? game?.joineeId : game?.hostId
         socket.to(opponetId).emit("opponent-won",{name:user?.username});
-    })
+    });
 
+    socket.on("play-again",(data:{gameId:string})=>{
+        const {gameId} = data;
+        const game = getGameById(gameId);
+
+        const opponetId = game?.hostId===socket.id ? game?.joineeId : game?.hostId;
+        const user = getUserBySocket(socket.id);
+        socket.to(opponetId).emit("play-again-request",{name:user?.username});
+    });
+
+    socket.on("request-accepted",(data:{gameId:string})=>{
+        const {gameId} = data;
+        const game = getGameById(gameId);
+        const opponetId = game?.hostId===socket.id ? game?.joineeId : game?.hostId;
+
+        const user = getUserBySocket(socket.id);
+
+        socket.to(opponetId).emit("your-request-accepted",{name:user?.username});
+    });
+
+    socket.on("request-rejected",(data:{gameId:string})=>{
+        const {gameId} = data;
+        const game = getGameById(gameId);
+        const opponetId = game?.hostId===socket.id ? game?.joineeId : game?.hostId;
+
+        const user = getUserBySocket(socket.id);
+
+        socket.to(opponetId).emit("your-request-rejected",{name:user?.username});
+    });
 
 
 })

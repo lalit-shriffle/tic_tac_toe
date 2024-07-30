@@ -27,9 +27,11 @@ const Game = (props: Props) => {
   const [score, setScore] = useState(initialState);
   const [playerNo, setPlayerNo] = useState(User?.isHost ? "1" : "2");
   const [player, setPlayer] = useState(User?.isHost ? "1" : "2");
+  const [steps, setSteps] = useState<number>(0);
   const [opponateWinnerName, setOpponateWinnerName] = useState<string | null>(
     null
   );
+  const [requsetAccepted, setRequestAccepted] = useState<boolean>(false)
   const [winner, setWinner] = useState<string | null>(null);
 
   function handleMoveClick(box: number) {
@@ -51,6 +53,7 @@ const Game = (props: Props) => {
 
     // changing player
     setPlayer((prev) => (prev === "1" ? "2" : "1"));
+    setSteps(prev=>prev+1);
   }
 
   // listening opponent winning event
@@ -76,12 +79,18 @@ const Game = (props: Props) => {
         }));
 
         setPlayer(() => (player === "1" ? "2" : "1"));
+        setSteps(prev=>prev+1);
       });
     }
-  }, [socket]);
+    return ()=>{
+      socket.off("opponent-moved");
+    }
+  }  
+  , [socket]);
 
   // checking winner.
   useEffect(() => {
+    if(steps<5)return;
     allWinnerFunction();
   }, [score]);
 
@@ -113,19 +122,39 @@ const Game = (props: Props) => {
     isPalyerWon(3, 5, 7);
   }
 
+  useEffect(()=>{
+    console.log("steps",steps);
+  },[steps]);
+
+
+
+  // reset setup for play again;
+  useEffect(()=>{
+    if(requsetAccepted){
+      setScore(initialState);
+      setOpponateWinnerName(null);
+      setWinner(null);
+      setPlayer(User?.isHost ? "1" : "2");
+      setSteps(0);
+      setRequestAccepted(false);
+    }
+  },[requsetAccepted])
+
   return (
     <div className="h-screen bg-white flex items-center justify-center">
       {/* wrapper */}
       <div className="shadow-sm rounded flex flex-col justify-center gap-6 items-center  shadow-black min-h-[60vh]  w-[50vw]">
         <GameInfo />
 
-        <Result winner={winner} opponateWinnerName={opponateWinnerName} />
+        <Result setRequestAccepted={setRequestAccepted}  winner={winner} opponateWinnerName={opponateWinnerName} />
 
         <PlayerTurn
           winner={winner}
           opponateWinnerName={opponateWinnerName}
+          steps={steps}
           player={player}
           playerNo={playerNo}
+          setRequestAccepted={setRequestAccepted}
         />
 
         {/* game */}

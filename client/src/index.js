@@ -6,7 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import UserContextProvider from "./providers/UserContextProvider.tsx";
 import GameContextProvider from "./providers/GameContextProvider.tsx";
-
+import {Toaster} from "react-hot-toast"
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
@@ -17,6 +17,7 @@ root.render(
         </GameContextProvider>
       </UserContextProvider>
     </BrowserRouter>
+    <Toaster/>
   </React.StrictMode>
 );
 

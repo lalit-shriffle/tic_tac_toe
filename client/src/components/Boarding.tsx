@@ -61,7 +61,7 @@ const Boarding = (props: Props) => {
     const isValidate = Object.keys(errors).length <= 0;
 
     if (!isValidate) return;
-
+    setUser({ name: name, isHost: false });
     setGameId(joinGameId);
     socket.emit("join-game", { name: newJoinee, gameId: joinGameId });
     navigate("/home");
