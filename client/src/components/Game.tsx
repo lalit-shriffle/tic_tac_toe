@@ -157,7 +157,7 @@ const Game = (props: Props) => {
           setRequestAccepted={setRequestAccepted}
         />
 
-        {/* game */}
+        {/* gamee */}
         <div className="w-full h-full flex flex-col gap-[2px] items-center justify-center">
           <div className="flex flex-col items-center ">
             {/* row 1 */}
