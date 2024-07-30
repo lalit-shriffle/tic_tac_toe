@@ -25,6 +25,10 @@ interface Game {
     gameId:string;
     hostId:string;
     joineeId:string | null;
+    hostWon:number;
+    joineeWon:number;
+    totalGame:number;
+    gameTied: number
 }
 
 // user and game initailization
@@ -49,7 +53,7 @@ function pushNewUser(socketId:string,username:string){
 }
 
 function createNewGame (gameId:string, hostId:string){
-    const game = {gameId:gameId, hostId:hostId, joineeId:null};
+    const game = {gameId:gameId, hostId:hostId, joineeId:null, hostWon:0, totalGame:0, joineeWon:0, gameTied:0};
     games.push(game);
     console.log("game created",games);
 }
@@ -71,6 +75,28 @@ function getUserBySocket(socketId:string){
     return connectedUsers.find((user)=>user.socketId === socketId)
 }
 
+function gameTied(gameId:string){
+    games.forEach((game)=>{
+        if(game.gameId === gameId){
+            game.gameTied += 1;
+            game.totalGame += 1;
+        }
+    })
+}
+
+function addWinner (gameId:string,winnerId:string){
+    games.forEach((game)=>{
+        if(game.gameId === gameId){
+            if(game.hostId === winnerId){
+                game.hostWon += 1;
+            }else{
+                game.joineeWon += 1;
+            }
+
+            game.totalGame += 1;
+        }
+    })
+}
 // Event Listeners
 io.on("connection",(socket:any)=>{
     console.log("socket connected",socket.id);
@@ -86,8 +112,7 @@ io.on("connection",(socket:any)=>{
         console.log("join game",data);
         pushNewUser(socket.id,name)
         joinGame(gameId, socket.id);
-        const game = getGameById(gameId)
-
+        const game = getGameById(gameId);
         socket.to(game?.hostId).emit("user-joined",name);
     });
 
@@ -102,8 +127,10 @@ io.on("connection",(socket:any)=>{
     socket.on("winner",(gameId:string)=>{
         const game = getGameById(gameId);
         const user = getUserBySocket(socket.id);
+        addWinner(gameId,socket.id);
         const opponetId = game?.hostId===socket.id ? game?.joineeId : game?.hostId
         socket.to(opponetId).emit("opponent-won",{name:user?.username});
+        console.log(game);
     });
 
     socket.on("play-again",(data:{gameId:string})=>{
@@ -134,6 +161,20 @@ io.on("connection",(socket:any)=>{
 
         socket.to(opponetId).emit("your-request-rejected",{name:user?.username});
     });
+
+    socket.on("game-tied",(data:{gameId:string})=>{
+        const {gameId} = data;
+        console.log("game tied",gameId);
+        gameTied(data.gameId);
+        console.log(games);
+    });
+
+    socket.on("game-status",(data:{gameId:string},callback:(data:any)=>void)=>{
+        const {gameId} = data;
+        const game = getGameById(gameId);
+        callback(game);
+    })
+    
 
 
 })

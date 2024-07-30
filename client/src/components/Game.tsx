@@ -6,6 +6,7 @@ import { userContext } from "../context/userContext.ts";
 import Box from "./Box.tsx";
 import Result from "./Result.tsx";
 import PlayerTurn from "./PlayerTurn.tsx";
+import GameHistory from "./GameHistory.tsx";
 
 type Props = {};
 
@@ -28,11 +29,12 @@ const Game = (props: Props) => {
   const [playerNo, setPlayerNo] = useState(User?.isHost ? "1" : "2");
   const [player, setPlayer] = useState(User?.isHost ? "1" : "2");
   const [steps, setSteps] = useState<number>(0);
+  const [requsetAccepted, setRequestAccepted] = useState<boolean>(false)
+  const [winner, setWinner] = useState<string | null>(null);
+  const [isGameTied , setGameTied] = useState(false);
   const [opponateWinnerName, setOpponateWinnerName] = useState<string | null>(
     null
   );
-  const [requsetAccepted, setRequestAccepted] = useState<boolean>(false)
-  const [winner, setWinner] = useState<string | null>(null);
 
   function handleMoveClick(box: number) {
     // Not player turn or already box is selected.
@@ -122,13 +124,8 @@ const Game = (props: Props) => {
     isPalyerWon(3, 5, 7);
   }
 
-  useEffect(()=>{
-    console.log("steps",steps);
-  },[steps]);
 
-
-
-  // reset setup for play again;
+// reset setup for play again;
   useEffect(()=>{
     if(requsetAccepted){
       setScore(initialState);
@@ -137,13 +134,23 @@ const Game = (props: Props) => {
       setPlayer(User?.isHost ? "1" : "2");
       setSteps(0);
       setRequestAccepted(false);
+      setGameTied(false);
     }
-  },[requsetAccepted])
+  },[requsetAccepted]);
+
+  useEffect(()=>{
+    if(steps < 9) return;
+    if(User.isHost && !winner && !opponateWinnerName){
+      socket.emit("game-tied",{gameId:gameId});
+    }
+    setGameTied(true);
+  },[socket,steps])
 
   return (
-    <div className="h-screen bg-white flex items-center justify-center">
+    <div className="h-screen bg-white flex items-center justify-center flex-col gap-2">
       {/* wrapper */}
-      <div className="shadow-sm rounded flex flex-col justify-center gap-6 items-center  shadow-black min-h-[60vh]  w-[50vw]">
+      <GameHistory winner={winner} opponateWinnerName={opponateWinnerName} isGameTied={isGameTied}/>
+      <div className="p-2 shadow-sm rounded flex flex-col justify-center gap-6 items-center  shadow-black min-h-[60vh]  w-[50vw]">
         <GameInfo />
 
         <Result setRequestAccepted={setRequestAccepted}  winner={winner} opponateWinnerName={opponateWinnerName} />
